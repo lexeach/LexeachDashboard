@@ -60,22 +60,31 @@ function DrawerAppBar(props) {
         {/* </ListItem> */}
       </List>
       <List>
-        <Link to={`/`}>
+        <a onClick={() => openInNewTab("https://google.com")}>
+          <ListItem disablePadding>
+            <ListItemButton sx={{ textAlign: "center" }}>
+              <ListItemText primary="SWAP" />
+            </ListItemButton>
+          </ListItem>
+        </a>
+      </List>
+      {/* <List> */}
+      {/* <Link to={`/`}>
           <ListItem disablePadding>
             <ListItemButton sx={{ textAlign: "center" }}>
               <ListItemText primary="Home" />
             </ListItemButton>
           </ListItem>
-        </Link>
+        </Link> */}
 
-        {/* <Link to={`/event`}>
+      {/* <Link to={`/event`}>
           <ListItem disablePadding>
             <ListItemButton sx={{ textAlign: "center" }}>
               <ListItemText primary="Event" />
             </ListItemButton>
           </ListItem>
         </Link> */}
-      </List>
+      {/* </List> */}
     </Box>
   );
 
@@ -98,6 +107,10 @@ function DrawerAppBar(props) {
     }
     load();
   }, []);
+
+  const openInNewTab = (url) => {
+    window.open(url, "_self");
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -126,9 +139,19 @@ function DrawerAppBar(props) {
             >
               {account}
             </Button>
-            <Link to={`/`}>
+            <Button
+              onClick={() => openInNewTab("https://google.com")}
+              sx={{
+                border: "2px #f4ad23 solid",
+                color: "#2f2f2f !important",
+                borderRadius: "20px;",
+              }}
+            >
+              SWAP
+            </Button>
+            {/* <Link to={`/`}>
               <Button sx={{ color: "#fff" }}>Home</Button>
-            </Link>
+            </Link> */}
             {/* <Link to={`/event`}>
               <Button sx={{ color: "#fff" }}>Event</Button>
             </Link> */}

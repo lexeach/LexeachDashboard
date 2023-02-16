@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { ThreeCircles } from "react-loader-spinner";
+import { Button, Modal } from "antd";
+
 import abiDecoder from "abi-decoder";
 
 import { useLocation } from "react-router-dom";
@@ -10,6 +13,7 @@ import { ICU, BEP20, USDT, EXAM } from "../../utils/web3.js";
 const Dashboard = () => {
   const web3 = new Web3(Web3.givenProvider || "http://localhost:7545");
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [account, setAccount] = useState();
   const [balance, setBalance] = useState();
   const [frznBalance, setFrznBalance] = useState();
@@ -32,6 +36,7 @@ const Dashboard = () => {
   const [copySuccess, setCopySuccess] = useState(false);
 
   const [userAc, setUserAc] = useState(0);
+  const [loader, setLoader] = useState(false);
 
   //////////////////////////////////
   const location = useLocation().search;
@@ -87,7 +92,6 @@ const Dashboard = () => {
         stageIncomeReceived,
       } = userDetail;
       setUdAutoPoolPayReceived(autoPoolPayReceived);
-      setUdAutopoolPayReciever(autopoolPayReciever);
       setUdCoreferredUsers(coreferredUsers);
       setUdCoreferrerID(coreferrerID);
       setUdId(id);
@@ -98,6 +102,10 @@ const Dashboard = () => {
       setUdReferredUsers(referredUsers);
       setUdReferrerID(referrerID);
       setUdStageIncomeReceived(stageIncomeReceived);
+      let payReciverUserD = await ICU_.methods
+        .users(autopoolPayReciever)
+        .call();
+      setUdAutopoolPayReciever(payReciverUserD.id);
     }
     user_detail();
   }, []);
@@ -194,12 +202,32 @@ const Dashboard = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     let { id, coref } = referrerID;
+    console.log("before sircle");
 
+    // console.log("after sircle");
+
+    // return;
+    setLoader(true);
+    setIsModalOpen(true);
     let ICU_ = new web3.eth.Contract(ICU.ABI, ICU.address);
     let value_ = await ICU_.methods.REGESTRATION_FESS().call();
+    console.log("resonse value", value_);
+    // if (value_) {
+    //   setLoader(false);
+    //   setIsModalOpen(false);
+    // }
+
+    // if (value_) {
+    //   setLoader(false);
+    // }
+    // setLoader(true);
+    // if (loader) {
+    // }
     let currentTokenAccepting = await ICU_.methods
       .currentTokenAccepting()
       .call();
+    //.on("error", console.error);
+
     console.log("the approve currentTokenAccepting", currentTokenAccepting);
     // the approve currentTokenAccepting ERC20-Token-Accepting
 
@@ -209,36 +237,61 @@ const Dashboard = () => {
         .allowance(account, ICU.address)
         .call();
       let isApprove, reg_user;
+      console.log("iss alloweance");
       if (isAllowance < value_) {
         isApprove = await USDT_.methods
           .approve(ICU.address, value_)
-          .send({ from: account });
+          .send({ from: account })
+          .on("error", console.error);
+        console.log("is approved after asss allownce");
       } else {
       }
+      console.log("isApprove", isApprove);
       reg_user = await ICU_.methods
         .Registration(id, coref, value_)
-        .send({ from: account, value: 0 });
+        .send({ from: account, value: 0 })
+        .on("error", (err) => {
+          console.log("the error in reg", err);
+          setLoader(false);
+          setIsModalOpen(false);
+        });
+      console.log("reg_user", reg_user);
+
       console.log("****** native coin accepting condtion", reg_user);
       if (reg_user.status) {
-        alert("Registerd Success");
+        setLoader(false);
+        setIsModalOpen(false);
+        // alert("Registerd Success");
       } else {
-        alert("Registerd Failed !!!!");
+        // alert("Registerd Failed !!!!");
+        setLoader(false);
+        setIsModalOpen(false);
       }
     } else {
       let BEP20_ = new web3.eth.Contract(BEP20.ABI, BEP20.address);
       let approve = await BEP20_.methods
         .approve(ICU.address, value_)
         .send({ from: account });
+      // .on("error", console.error);
       console.log("the approve response", approve);
       console.log("the value out of status", value_);
       if (approve.status === true) {
         let reg_user = await ICU_.methods
           .regUser(id, coref, value_)
-          .send({ from: account, value: 0 });
+          .send({ from: account, value: 0 })
+          .on("error", (err) => {
+            console.log("the error in reg", err);
+            setLoader(false);
+            setIsModalOpen(false);
+          });
         if (reg_user.status) {
-          alert("Registerd Success");
+          // alert("Registerd Success");
+          setLoader(false);
+          setIsModalOpen(false);
         } else {
-          alert("Registerd Failed !!!!");
+          // alert("Registerd Failed !!!!");
+          setLoader(false);
+          setIsModalOpen(false);
         }
       }
     }
@@ -370,35 +423,28 @@ const Dashboard = () => {
     userAccount();
   }, []);
 
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="home-container container">
       <div className="row">
-        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+        {/* ////// */}
+        {/* public value  */}
+        {/* ////// */}
+        <div className="col-sm-12 grid-margin">
           <div className="card">
-            <div className="card-body">
-              <h6>Frozen Balance </h6>
-              <h4 className="mb-0">{frznBalance ? frznBalance : 0} (SLR)</h4>
-            </div>
+            <div className="card-body text-center">Public Value</div>
           </div>
         </div>
-        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>Token Balance</h6>
-
-              <h4 className="mb-0">{tokenBalance ? tokenBalance : 0} (SLR)</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>BNB Balance</h6>
-              <h4 className="mb-0">{balance ? balance : 0}</h4>
-            </div>
-          </div>
-        </div>
-        {/* reg fee  */}
+        {/* reg fee 1 */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -409,6 +455,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Current ID 2 */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -417,6 +464,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Direct Income 3  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -427,6 +475,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Token reward  4 */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -437,14 +486,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>Token Price</h6>
-              <h4 className="mb-0">{tokenPrice ? tokenPrice : 0} (USDT)</h4>
-            </div>
-          </div>
-        </div>
+        {/* Next Reward   */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -453,6 +495,102 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Is Exist  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Is Exist</h6>
+              <h4 className="mb-0">{udIsExist ? "YES" : "NO"}</h4>
+            </div>
+          </div>
+        </div>
+        {/* sub admin  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Sub Admin </h6>
+              <h4 className="mb-0">{exSubAdmin ? "YES" : "NO"}</h4>
+            </div>
+          </div>
+        </div>
+        {/* autopool income  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Autopool Income</h6>
+              <h2 className="mb-0">{payAutoPool ? payAutoPool : 0} (USDT)</h2>
+            </div>
+          </div>
+        </div>
+        {/* level income  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Level Income</h6>
+              <h2 className="mb-0">{levelPrice ? levelPrice : 0} (USDT)</h2>
+            </div>
+          </div>
+        </div>
+        {/* stage income */}
+        {exSubAdmin ? (
+          <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+            <div className="card">
+              <div className="card-body">
+                <h6>Stage Income</h6>
+                <h2 className="mb-0">
+                  {levelPrice ? levelPrice * 2 : 0} (USDT)
+                </h2>
+              </div>
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
+        {/* ////// */}
+        {/* private  */}
+        {/* ////// */}
+        <div className="col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body text-center">Private Value</div>
+          </div>
+        </div>
+        {/* forezen balace  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Frozen Balance </h6>
+              <h4 className="mb-0">{frznBalance ? frznBalance : 0} (SLR)</h4>
+            </div>
+          </div>
+        </div>
+        {/* Token balace  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Token Balance</h6>
+              <h4 className="mb-0">{tokenBalance ? tokenBalance : 0} (SLR)</h4>
+            </div>
+          </div>
+        </div>
+        {/* bnb balance  */}
+        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>BNB Balance</h6>
+              <h4 className="mb-0">{balance ? balance : 0}</h4>
+            </div>
+          </div>
+        </div>
+        {/* Token Price  */}
+        {/* <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
+          <div className="card">
+            <div className="card-body">
+              <h6>Token Price</h6>
+              <h4 className="mb-0">{tokenPrice ? tokenPrice : 0} (USDT)</h4>
+            </div>
+          </div>
+        </div> */}
+        {/* Pay Received  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -463,6 +601,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* CoReferre ID  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -471,6 +610,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* User ID  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -479,6 +619,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Income  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -487,14 +628,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>Is Exist</h6>
-              <h4 className="mb-0">{udIsExist ? "true" : "false"}</h4>
-            </div>
-          </div>
-        </div>
+        {/* Income Received  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -505,6 +639,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Missed Pool  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -515,6 +650,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Referred  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -523,6 +659,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* Referrer ID  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
@@ -557,16 +694,8 @@ const Dashboard = () => {
         ) : (
           ""
         )}
-        {/* sub admin  */}
+        {/* pay reciver  */}
         <div className="col-lg-3 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>Sub Admin </h6>
-              <h4 className="mb-0">{exSubAdmin ? "true" : "false"}</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-9 col-md-9 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
               <h6>Pay Reciever</h6>
@@ -576,26 +705,11 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        {/* line  */}
         <div className="col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body text-center">
-              SLR address 0x43cD61f2B487847dC73ABC5b6A2B72Ee7E989D02
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-6 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>Autopool Income</h6>
-              <h2 className="mb-0">{payAutoPool ? payAutoPool : 0} (USDT)</h2>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-6 col-md-6 col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h6>Level Income</h6>
-              <h2 className="mb-0">{levelPrice ? levelPrice : 0} (USDT)</h2>
+              {/* SLR address 0x43cD61f2B487847dC73ABC5b6A2B72Ee7E989D02 */}
             </div>
           </div>
         </div>
@@ -648,6 +762,30 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      {/* <button onClick={showModal}>open</button> */}
+      <Modal
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={null}
+        closable={false}
+        className="ant-model-custom"
+      >
+        <div className="loader-section">
+          <ThreeCircles
+            height="100"
+            width="100"
+            color="#4fa94d"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={loader}
+            ariaLabel="three-circles-rotating"
+            outerCircleColor=""
+            innerCircleColor=""
+            middleCircleColor=""
+          />
+        </div>
+      </Modal>
     </div>
   );
 };
