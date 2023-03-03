@@ -261,9 +261,9 @@ const Dashboard = () => {
       if (reg_user.status) {
         setLoader(false);
         setIsModalOpen(false);
-        // alert("Registerd Success");
+        alert("Registerd Success");
       } else {
-        // alert("Registerd Failed !!!!");
+        alert("Registerd Failed !!!!");
         setLoader(false);
         setIsModalOpen(false);
       }
@@ -285,11 +285,11 @@ const Dashboard = () => {
             setIsModalOpen(false);
           });
         if (reg_user.status) {
-          // alert("Registerd Success");
+          alert("Registerd Success");
           setLoader(false);
           setIsModalOpen(false);
         } else {
-          // alert("Registerd Failed !!!!");
+          alert("Registerd Failed !!!!");
           setLoader(false);
           setIsModalOpen(false);
         }
@@ -435,7 +435,7 @@ const Dashboard = () => {
 
   return (
     <div className="home-container container">
-      <div className="row">
+      <div className="row public-section-bg">
         {/* ////// */}
         {/* public value  */}
         {/* ////// */}
@@ -546,6 +546,8 @@ const Dashboard = () => {
         ) : (
           ""
         )}
+      </div>
+      <div className="row private-section-bg">
         {/* ////// */}
         {/* private  */}
         {/* ////// */}
@@ -706,63 +708,71 @@ const Dashboard = () => {
           </div>
         </div>
         {/* line  */}
-        <div className="col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body text-center">
-              {/* SLR address 0x43cD61f2B487847dC73ABC5b6A2B72Ee7E989D02 */}
-            </div>
-          </div>
-        </div>
-        <div className="col-sm-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h5>Sponsor ID</h5>
-              <div className="row">
-                <div className="col-sm-12 my-auto">
-                  <form className="forms-sample" onSubmit={handleSubmit}>
-                    <div className="form-group w-100">
-                      <input
-                        className="form-control mt-2"
-                        type="number"
-                        required
-                        name="id"
-                        onChange={handleChange}
-                        value={referrerID.id}
-                        placeholder="Referral ID"
-                      />
-                      <input
-                        className="form-control mt-2"
-                        type="number"
-                        required
-                        name="coref"
-                        onChange={handleChange}
-                        value={referrerID.coref}
-                        placeholder="CoReferral ID"
-                      />
-                      <input
-                        className="btn btn-primary mt-3"
-                        type="submit"
-                        value="Submit"
-                      />
-                    </div>
-                  </form>
+        {udIsExist ? (
+          <>
+            {" "}
+            <div className="col-sm-12 grid-margin">
+              <div className="card">
+                <div className="card-body text-center">
+                  {/* SLR address 0x43cD61f2B487847dC73ABC5b6A2B72Ee7E989D02 */}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="col-12 text-center">
-          <button className={`ref-btn`} onClick={copyToClipBoard}>
-            Click here to copy your Referral link
-          </button>
-          {copySuccess === true ? (
-            <span className="ref-btn-success">✓ copied.</span>
-          ) : (
-            ""
-          )}
-        </div>
+            <div className="col-sm-12 grid-margin">
+              <div className="card">
+                <div className="card-body">
+                  <h5>Sponsor ID</h5>
+                  <div className="row">
+                    <div className="col-sm-12 my-auto">
+                      <form className="forms-sample" onSubmit={handleSubmit}>
+                        <div className="form-group w-100">
+                          <input
+                            className="form-control mt-2"
+                            type="number"
+                            required
+                            name="id"
+                            onChange={handleChange}
+                            value={referrerID.id}
+                            placeholder="Referral ID"
+                          />
+                          <input
+                            className="form-control mt-2"
+                            type="number"
+                            required
+                            name="coref"
+                            onChange={handleChange}
+                            value={referrerID.coref}
+                            placeholder="CoReferral ID"
+                          />
+                          <input
+                            className="btn btn-primary mt-3"
+                            type="submit"
+                            value="Submit"
+                          />
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-12 text-center">
+              <button className={`ref-btn`} onClick={copyToClipBoard}>
+                Click here to copy your Referral link
+              </button>
+              {copySuccess === true ? (
+                <span className="ref-btn-success">✓ copied.</span>
+              ) : (
+                ""
+              )}
+            </div>
+          </>
+        ) : (
+          ""
+        )}
       </div>
       {/* <button onClick={showModal}>open</button> */}
+      <div className="pt-5"></div>
       <Modal
         open={isModalOpen}
         onOk={handleOk}
