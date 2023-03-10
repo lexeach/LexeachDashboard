@@ -35,7 +35,7 @@
 .card {
   margin: 15px;
   border: none;
-  border-radius: 0px 83px;
+  // border-radius: 0px 83px;
   text-align: center;
   box-shadow: 16px 17px 3px 0 rgb(0 0 0 / 50%);
 
@@ -44,7 +44,8 @@
     color: #ffffff;
     padding: 1.75rem 1.5625rem;
     background: rgb(2 15 56 / 78%) !important;
-    border-radius: 0px 63px;
+    // border-radius: 0px 63px;
+    border-radius: 5px;
   }
 }
 

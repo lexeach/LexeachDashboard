@@ -709,8 +709,9 @@ const Dashboard = () => {
         </div>
         {/* line  */}
         {udIsExist ? (
+          ""
+        ) : (
           <>
-            {" "}
             <div className="col-sm-12 grid-margin">
               <div className="card">
                 <div className="card-body text-center">
@@ -767,8 +768,6 @@ const Dashboard = () => {
               )}
             </div>
           </>
-        ) : (
-          ""
         )}
       </div>
       {/* <button onClick={showModal}>open</button> */}
